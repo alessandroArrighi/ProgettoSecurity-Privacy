@@ -1,0 +1,75 @@
+version: '2.28.1'
+
+volumes:
+  dependency-track:
+
+services:
+  dtrack-apiserver:
+    container_name: dt-server
+    image: dependencytrack/apiserver
+    networks:
+      - pipeline
+    deploy:
+      resources:
+        limits:
+          memory: 12288m
+        reservations:
+          memory: 8192m
+      restart_policy:
+        condition: on-failure
+    ports:
+      - '3001:8080'
+    volumes:
+      - 'dependency-track:/data'
+    restart: unless-stopped
+
+  dtrack-frontend:
+    container_name: dt-frontend
+    image: dependencytrack/frontend
+    networks:
+      - pipeline
+    depends_on:
+      - dtrack-apiserver
+    environment:
+      - API_BASE_URL=http://localhost:3001
+    ports:
+      - "3000:8080"
+    restart: unless-stopped
+  
+  jenkins:
+    container_name: jenkins
+    image: jenkins
+    networks:
+      - pipeline
+    restart: on-failure
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  
+  sonarqube:
+    container_name: sonarqubeeee
+    image: sonarqube
+    networks:
+      - pipeline
+    ports:
+      - "9000:9000"
+    restart: on-failure
+  
+  db:
+    container_name: db-ecommerce
+    image: mysql
+    networks:
+      - pipeline
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+networks:
+  pipeline:
+    name: pipeline
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.20.0.0/16
+         gateway: 172.20.0.1
