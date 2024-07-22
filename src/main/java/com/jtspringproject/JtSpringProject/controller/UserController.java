@@ -1,5 +1,6 @@
 package com.jtspringproject.JtSpringProject.controller;
 
+import com.jtspringproject.JtSpringProject.dto.UserDTO;
 import com.jtspringproject.JtSpringProject.models.Cart;
 import com.jtspringproject.JtSpringProject.models.Product;
 import com.jtspringproject.JtSpringProject.models.User;
@@ -102,12 +103,17 @@ public class UserController{
 		return mView;
 	}
 	@RequestMapping(value = "newuserregister", method = RequestMethod.POST)
-	public ModelAndView newUseRegister(@ModelAttribute User user)
+	public ModelAndView newUseRegister(@ModelAttribute UserDTO userDTO)
 	{
 		// Check if username already exists in database
-		boolean exists = this.userService.checkUserExists(user.getUsername());
+		boolean exists = this.userService.checkUserExists(userDTO.getUsername());
 
 		if(!exists) {
+			User user = new User();
+			user.setUsername(userDTO.getUsername());
+			user.setPassword(userDTO.getPassword());
+			user.setEmail(userDTO.getEmail());
+
 			System.out.println(user.getEmail());
 			user.setRole("ROLE_NORMAL");
 			this.userService.addUser(user);
@@ -116,9 +122,9 @@ public class UserController{
 			ModelAndView mView = new ModelAndView("userLogin");
 			return mView;
 		} else {
-			System.out.println("New user not created - username taken: " + user.getUsername());
+			System.out.println("New user not created - username taken: " + userDTO.getUsername());
 			ModelAndView mView = new ModelAndView("register");
-			mView.addObject("msg", user.getUsername() + " is taken. Please choose a different username.");
+			mView.addObject("msg", userDTO.getUsername() + " is taken. Please choose a different username.");
 			return mView;
 		}
 	}

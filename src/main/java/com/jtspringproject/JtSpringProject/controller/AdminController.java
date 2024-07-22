@@ -231,14 +231,13 @@ public class AdminController {
 	@GetMapping("profileDisplay")
 	public String profileDisplay(Model model) {
 		String displayusername,displaypassword,displayemail,displayaddress;
-		try
+		String pwd = System.getProperty("database.password");
+		try (Connection con = DriverManager.getConnection("jdbc:derby:memory:myDB;create=true", "login", pwd))
 		{
 			Class.forName("com.mysql.jdbc.Driver");
-			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/ecommjava","root","");
 			PreparedStatement stmt = con.prepareStatement("select * from users where username = ?"+";");
 			stmt.setString(1, usernameforclass);
 			ResultSet rst = stmt.executeQuery();
-			
 			if(rst.next())
 			{
 			int userid = rst.getInt(1);
@@ -265,10 +264,10 @@ public class AdminController {
 	public String updateUserProfile(@RequestParam("userid") int userid,@RequestParam("username") String username, @RequestParam("email") String email, @RequestParam("password") String password, @RequestParam("address") String address) 
 	
 	{
-		try
+		String pwd = System.getProperty("database.password");
+		try (Connection con = DriverManager.getConnection("jdbc:derby:memory:myDB;create=true", "login", pwd);)
 		{
 			Class.forName("com.mysql.jdbc.Driver");
-			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/ecommjava","root","");
 			
 			PreparedStatement pst = con.prepareStatement("update users set username= ?,email = ?,password= ?, address= ? where uid = ?;");
 			pst.setString(1, username);
